@@ -12,7 +12,7 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ loginAction }: LoginFormProps) {
-  const [state, formAction, isPending] = useActionState<LoginState, FormData>(
+  const [state, formAction, isPending] = useActionState<LoginState | undefined, FormData>(
     loginAction,
     undefined
   );

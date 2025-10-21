@@ -13,9 +13,7 @@ async function getFileStats(): Promise<FileStats> {
     return {
       total: 0,
       pending: 0,
-      processing: 0,
       completed: 0,
-      error: 0,
     };
   }
 
