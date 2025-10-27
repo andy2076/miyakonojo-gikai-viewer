@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 議事録解析データ（ローカルのみ）
+議事録解析/
+
+# テストファイル
+test-*.js
+
+# SQLファイル（開発用）
+supabase-*.sql

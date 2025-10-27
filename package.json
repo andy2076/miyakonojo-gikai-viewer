@@ -9,8 +9,13 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.1",
+    "@types/papaparse": "^5.3.16",
+    "@types/pdf-parse": "^1.1.5",
     "chart.js": "^4.5.1",
+    "mammoth": "^1.11.0",
     "next": "15.5.6",
+    "papaparse": "^5.5.3",
+    "pdf2json": "^4.0.0",
     "react": "19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "19.1.0"
