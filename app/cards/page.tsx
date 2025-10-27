@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { QuestionCardRecord } from '@/types/database';
@@ -14,7 +14,7 @@ interface CardsResponse {
   offset: number;
 }
 
-export default function CardsPage() {
+function CardsPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const meetingParam = searchParams.get('meeting');
@@ -482,5 +482,20 @@ export default function CardsPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function CardsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    }>
+      <CardsPageContent />
+    </Suspense>
   );
 }
