@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- 議事堂の建物 -->
+  <defs>
+    <linearGradient id="buildingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- 背景円 -->
+  <circle cx="32" cy="32" r="30" fill="url(#buildingGrad)"/>
+
+  <!-- 議事堂の柱と屋根 -->
+  <!-- 屋根 -->
+  <polygon points="32,12 48,22 16,22" fill="#ffffff"/>
+
+  <!-- 柱 -->
+  <rect x="20" y="22" width="4" height="20" fill="#ffffff"/>
+  <rect x="30" y="22" width="4" height="20" fill="#ffffff"/>
+  <rect x="40" y="22" width="4" height="20" fill="#ffffff"/>
+
+  <!-- 基礎 -->
+  <rect x="14" y="42" width="36" height="6" fill="#ffffff"/>
+
+  <!-- 中央のドア -->
+  <rect x="28" y="32" width="8" height="10" fill="#1d4ed8"/>
+</svg>
