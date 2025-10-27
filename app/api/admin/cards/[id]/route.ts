@@ -7,7 +7,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 認証チェック
@@ -24,7 +24,8 @@ export async function DELETE(
       );
     }
 
-    const cardId = params.id;
+    const { id } = await params;
+    const cardId = id;
 
     // カードを削除
     const { error } = await supabase
