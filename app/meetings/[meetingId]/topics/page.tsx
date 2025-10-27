@@ -499,10 +499,10 @@ export default function MeetingTopicsPage() {
                 <div className="max-w-sm mx-auto">
                   <Pie
                     data={{
-                      labels: meetingData.supplementaryBudget.breakdown.map(item => item.category),
+                      labels: meetingData.supplementaryBudget.breakdown.map((item: any) => item.category),
                       datasets: [{
-                        data: meetingData.supplementaryBudget.breakdown.map(item => item.amount),
-                        backgroundColor: meetingData.supplementaryBudget.breakdown.map(item => item.color),
+                        data: meetingData.supplementaryBudget.breakdown.map((item: any) => item.amount),
+                        backgroundColor: meetingData.supplementaryBudget.breakdown.map((item: any) => item.color),
                         borderWidth: 2,
                         borderColor: '#ffffff',
                       }]
@@ -522,9 +522,10 @@ export default function MeetingTopicsPage() {
                                 return data.labels.map((label, i) => {
                                   const value = data.datasets[0].data[i] as number;
                                   const percentage = ((value / meetingData.supplementaryBudget!.total) * 100).toFixed(1);
+                                  const bgColors = data.datasets[0].backgroundColor as string[];
                                   return {
                                     text: `${label} (${percentage}%)`,
-                                    fillStyle: data.datasets[0].backgroundColor?.[i] as string,
+                                    fillStyle: bgColors?.[i] as string,
                                     hidden: false,
                                     index: i
                                   };
@@ -549,7 +550,7 @@ export default function MeetingTopicsPage() {
                 </div>
                 {/* 内訳リスト */}
                 <div className="mt-6 space-y-2">
-                  {meetingData.supplementaryBudget.breakdown.map((item, idx) => (
+                  {meetingData.supplementaryBudget.breakdown.map((item: any, idx: number) => (
                     <div key={idx} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
                         <div
@@ -603,7 +604,7 @@ export default function MeetingTopicsPage() {
 
         {/* トピックセクション */}
         <div className="space-y-8">
-          {meetingData.topics.map((topic, idx) => (
+          {meetingData.topics.map((topic: any, idx: number) => (
             <div
               key={idx}
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border border-purple-100 hover:shadow-xl transition-shadow"
@@ -623,7 +624,7 @@ export default function MeetingTopicsPage() {
               </div>
 
               <div className="space-y-6">
-                {topic.items.map((item, itemIdx) => (
+                {topic.items.map((item: any, itemIdx: number) => (
                   <div
                     key={itemIdx}
                     className="border-l-4 border-purple-300 pl-6 py-2"
@@ -658,7 +659,7 @@ export default function MeetingTopicsPage() {
             今回の議会のポイント
           </h2>
           <ul className="space-y-3">
-            {meetingData.summary.map((point, idx) => (
+            {meetingData.summary.map((point: any, idx: number) => (
               <li
                 key={idx}
                 className="flex items-start gap-3 text-gray-800 text-lg"

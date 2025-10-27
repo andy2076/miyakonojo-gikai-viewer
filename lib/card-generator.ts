@@ -403,14 +403,17 @@ export function generateDetailedQuestionCards(
       const card: DetailedQuestionCard = {
         sessionIndex,
         memberName: session.member,
-        questionIndex,
         questionText: question.text,
+        questionSummary: '',
         answerTexts: allAnswerTexts,
         answerers: allAnswerers,
+        answerSummary: '',
         relatedAnswerTexts,
         relatedAnswerers,
         topics: session.topics || [],
         keywords: session.keywords || [],
+        fullContent: '',
+        contentData: [],
       };
 
       cards.push(card);

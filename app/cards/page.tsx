@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { QuestionCardRecord } from '@/types/database';
 
+export const dynamic = 'force-dynamic';
+
 interface CardsResponse {
   cards: QuestionCardRecord[];
   total: number;

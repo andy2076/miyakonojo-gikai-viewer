@@ -110,6 +110,8 @@ export interface QuestionCardRecord {
   gpt_nature_tags: string[] | null;
   // 新形式：テーマ配列
   themes: Theme[] | null;
+  // 閲覧数
+  view_count: number | null;
 }
 
 /**
@@ -120,12 +122,22 @@ export interface GPTAnalysisCSVRow {
   '会派': string;
   'テーマ番号': string;
   'テーマタイトル': string;
+  'テーマ'?: string;
+  '大項目'?: string;
+  '小項目'?: string;
   '質問のポイント': string;
+  '質問の要点'?: string;
   '回答のポイント': string;
+  '答弁の要点'?: string;
   '議論のポイント（なぜ重要か）': string;
+  '議論のポイント（なぜ重要か？）'?: string;
+  'なぜ重要か（ポイント）'?: string;
+  'なぜ重要か'?: string;
   '影響を受ける人': string;
   '分野タグ': string;
   '性質タグ': string;
+  // インデックスシグネチャでその他のフィールドも許可
+  [key: string]: string | undefined;
 }
 
 /**
