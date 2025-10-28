@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "import-topic": "tsx scripts/import-topic.ts"
+    "import-topic": "tsx scripts/import-topic.ts",
+    "import-topic-v2": "tsx scripts/import-topic-v2.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.1",
