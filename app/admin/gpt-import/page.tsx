@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
+type ImportMode = 'add' | 'update' | 'replace';
+
 export default function GPTImportPage() {
   const [file, setFile] = useState<File | null>(null);
   const [meetingName, setMeetingName] = useState('');
+  const [importMode, setImportMode] = useState<ImportMode>('add');
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<{
     success: boolean;
@@ -41,6 +44,7 @@ export default function GPTImportPage() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('meetingName', meetingName.trim());
+      formData.append('importMode', importMode);
 
       const response = await fetch('/api/admin/import-gpt-analysis', {
         method: 'POST',
@@ -134,6 +138,65 @@ export default function GPTImportPage() {
             </p>
           </div>
 
+          {/* インポートモード選択 */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              インポートモード <span className="text-red-500">*</span>
+            </label>
+            <div className="space-y-3">
+              <div className="flex items-start">
+                <input
+                  id="mode-add"
+                  type="radio"
+                  name="importMode"
+                  value="add"
+                  checked={importMode === 'add'}
+                  onChange={(e) => setImportMode(e.target.value as ImportMode)}
+                  disabled={uploading}
+                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="mode-add" className="ml-3 block">
+                  <span className="text-sm font-medium text-gray-900">追加モード</span>
+                  <p className="text-xs text-gray-500">既存カードに新しいテーマを追加します（デフォルト）</p>
+                </label>
+              </div>
+
+              <div className="flex items-start">
+                <input
+                  id="mode-update"
+                  type="radio"
+                  name="importMode"
+                  value="update"
+                  checked={importMode === 'update'}
+                  onChange={(e) => setImportMode(e.target.value as ImportMode)}
+                  disabled={uploading}
+                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="mode-update" className="ml-3 block">
+                  <span className="text-sm font-medium text-gray-900">更新モード</span>
+                  <p className="text-xs text-gray-500">テーマ番号が一致する既存テーマを上書きします。一つのテーマだけ修正したい時に便利です</p>
+                </label>
+              </div>
+
+              <div className="flex items-start">
+                <input
+                  id="mode-replace"
+                  type="radio"
+                  name="importMode"
+                  value="replace"
+                  checked={importMode === 'replace'}
+                  onChange={(e) => setImportMode(e.target.value as ImportMode)}
+                  disabled={uploading}
+                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="mode-replace" className="ml-3 block">
+                  <span className="text-sm font-medium text-gray-900">置き換えモード</span>
+                  <p className="text-xs text-gray-500">該当議員の既存テーマを全て削除してから新規作成します。全面的な修正が必要な時に使います</p>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div className="mb-4">
             <label
               htmlFor="csv-file"
@@ -220,10 +283,11 @@ export default function GPTImportPage() {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
           <h2 className="text-lg font-bold text-yellow-900 mb-3">⚠️ 注意事項</h2>
           <ul className="text-sm text-yellow-800 space-y-2 list-disc list-inside">
-            <li>CSV の各行から1つずつカードが新規作成されます</li>
-            <li>同じ議員でも、テーマごとに別々のカードが作成されます</li>
+            <li>同じ会議+議員の組み合わせで1つのカードにテーマがまとめられます</li>
             <li>議員名は自動的に「○○○議員」の形式に変換されます（スペースは削除されます）</li>
-            <li>インポート前に不要なカードを削除することをお勧めします</li>
+            <li><strong>追加モード</strong>：既存カードに新しいテーマを追加します</li>
+            <li><strong>更新モード</strong>：テーマ番号が一致するテーマを上書きします。1つのテーマだけ修正したい場合に便利です</li>
+            <li><strong>置き換えモード</strong>：該当議員の既存テーマを全削除して新規作成します</li>
           </ul>
         </div>
       </div>

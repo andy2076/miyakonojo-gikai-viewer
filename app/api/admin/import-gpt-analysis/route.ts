@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const meetingName = formData.get('meetingName') as string;
+    const importMode = (formData.get('importMode') as string) || 'add'; // デフォルトは追加モード
 
     if (!file) {
       return NextResponse.json({ error: 'ファイルが選択されていません' }, { status: 400 });
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '会議名が指定されていません' }, { status: 400 });
     }
 
-    console.log(`📋 インポート開始: 会議=${meetingName}`);
+    console.log(`📋 インポート開始: 会議=${meetingName}, モード=${importMode}`);
     console.log(`📄 ファイル名: ${file.name}`);
     console.log(`📊 ファイルサイズ: ${file.size} bytes`);
 
@@ -219,10 +220,40 @@ export async function POST(request: NextRequest) {
         const natureTagsArray = Array.from(data.natureTags);
 
         if (existingCards && existingCards.length > 0) {
-          // 既存カードに追加
+          // 既存カードを処理
           const card = existingCards[0];
           const existingThemes = (card.themes as Theme[]) || [];
-          const updatedThemes = [...existingThemes, ...data.themes];
+          let updatedThemes: Theme[];
+
+          // インポートモードによって処理を分岐
+          if (importMode === 'replace') {
+            // 置き換えモード: 既存テーマを全削除して新規テーマで置き換え
+            updatedThemes = [...data.themes];
+            console.log(`  🔄 置き換えモード: 既存${existingThemes.length}テーマを削除し、${data.themes.length}テーマで置き換え`);
+          } else if (importMode === 'update') {
+            // 更新モード: theme_numberでマッチングして既存テーマを上書き
+            const newThemeMap = new Map(data.themes.map(t => [t.theme_number, t]));
+            updatedThemes = existingThemes.map(existingTheme => {
+              // 同じtheme_numberの新しいテーマがあれば上書き
+              if (existingTheme.theme_number && newThemeMap.has(existingTheme.theme_number)) {
+                const newTheme = newThemeMap.get(existingTheme.theme_number)!;
+                newThemeMap.delete(existingTheme.theme_number); // 処理済みをマーク
+                console.log(`  🔄 更新: テーマ番号 ${existingTheme.theme_number} を上書き`);
+                return newTheme;
+              }
+              return existingTheme;
+            });
+            // マッチしなかった新しいテーマは末尾に追加
+            const unmatchedThemes = Array.from(newThemeMap.values());
+            if (unmatchedThemes.length > 0) {
+              updatedThemes.push(...unmatchedThemes);
+              console.log(`  ➕ ${unmatchedThemes.length}個の新規テーマを追加`);
+            }
+          } else {
+            // 追加モード（デフォルト）: 既存テーマに新しいテーマを追加
+            updatedThemes = [...existingThemes, ...data.themes];
+            console.log(`  ➕ 追加モード: 既存${existingThemes.length}テーマに${data.themes.length}テーマを追加`);
+          }
 
           // full_contentを更新（検索用にthemesの内容をテキスト化）
           const fullContentParts = updatedThemes.map(theme =>
@@ -253,7 +284,7 @@ export async function POST(request: NextRequest) {
           }
 
           updatedCount++;
-          console.log(`  ✅ 既存カードに${data.themes.length}テーマ追加`);
+          console.log(`  ✅ カード更新完了 (合計${updatedThemes.length}テーマ)`);
         } else {
           // full_contentを生成（検索用にthemesの内容をテキスト化）
           const fullContentParts = data.themes.map(theme =>
