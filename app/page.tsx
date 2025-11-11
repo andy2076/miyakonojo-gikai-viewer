@@ -63,8 +63,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  const [selectedMeetingYear, setSelectedMeetingYear] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [selectedMeetingYear, setSelectedMeetingYear] = useState<string>('all');
 
   // 会派別の色を取得
   const getFactionColor = (faction: string | null) => {
@@ -691,15 +691,29 @@ export default function Home() {
 
         {/* 議会から探す */}
         {meetings.length > 0 && (() => {
-          // 会議名から年度を抽出
+          // 全角数字を半角数字に変換
+          const toHalfWidth = (str: string) => {
+            return str.replace(/[０-９]/g, (s) => {
+              return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+          };
+
+          // 会議名から年度を抽出（全角数字に対応）
           const extractYear = (title: string): string | null => {
-            const match = title.match(/(令和\d+年|平成\d+年)/);
-            return match ? match[1] : null;
+            const normalized = toHalfWidth(title);
+            const match = normalized.match(/(令和\d+年|平成\d+年)/);
+            if (!match) return null;
+
+            // 元の文字列から該当部分を抽出（全角のまま返す）
+            const yearPattern = match[1];
+            const fullWidthMatch = title.match(new RegExp(yearPattern.replace(/\d/g, '[０-９\\d]')));
+            return fullWidthMatch ? fullWidthMatch[0] : match[1];
           };
 
           // 年度ごとの色を返す関数
           const getYearColor = (year: string): string => {
-            const yearNum = parseInt(year.match(/\d+/)?.[0] || '0', 10);
+            const normalized = toHalfWidth(year);
+            const yearNum = parseInt(normalized.match(/\d+/)?.[0] || '0', 10);
             const colors = [
               'text-blue-600',      // 令和5年
               'text-green-600',     // 令和4年
@@ -719,8 +733,10 @@ export default function Home() {
 
           // 年度順にソート（新しい順）
           const sortedYears = Array.from(years).sort((a, b) => {
-            const yearNumA = parseInt(a.match(/\d+/)?.[0] || '0', 10);
-            const yearNumB = parseInt(b.match(/\d+/)?.[0] || '0', 10);
+            const normalizedA = toHalfWidth(a);
+            const normalizedB = toHalfWidth(b);
+            const yearNumA = parseInt(normalizedA.match(/\d+/)?.[0] || '0', 10);
+            const yearNumB = parseInt(normalizedB.match(/\d+/)?.[0] || '0', 10);
             return yearNumB - yearNumA;
           });
 

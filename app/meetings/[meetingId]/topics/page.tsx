@@ -34,6 +34,8 @@ export default function MeetingTopicsPage() {
     try {
       setLoading(true);
 
+      console.log('🔍 Fetching data for meetingId:', meetingId);
+
       // meeting_topicsテーブルからmeeting_titleで検索
       const { data, error } = await supabase
         .from('meeting_topics')
@@ -41,25 +43,41 @@ export default function MeetingTopicsPage() {
         .eq('meeting_title', meetingId)
         .eq('published', true)
         .order('display_order', { ascending: true })
-        .limit(1)
-        .single();
+        .limit(1);
+
+      console.log('📦 Raw data from Supabase:', data);
+      console.log('❗ Error:', error);
 
       if (error) throw error;
 
-      if (data) {
+      const topicData = data?.[0];
+      console.log('📋 topicData (first element):', topicData);
+
+      if (topicData) {
+        console.log('📥 取得したデータ:', topicData);
+        console.log('📋 content_data:', topicData.content_data);
+        console.log('📌 topics:', topicData.content_data?.topics);
+
         // データを整形
         const formattedData = {
-          title: data.title,
-          date: data.date || meetingId,
-          description: data.description,
-          topics: data.content_data?.topics || [],
-          summary: data.summary || [],
-          supplementaryBudget: data.supplementary_budget,
-          totalBudgetAfter: data.total_budget_after,
-          stats: data.content_data?.stats,
-          keyAchievements: data.content_data?.key_achievements,
-          visualType: data.content_data?.visual_type || 'standard'
+          title: topicData.title,
+          date: topicData.date || meetingId,
+          description: topicData.description,
+          topics: topicData.content_data?.topics || [],
+          summary: topicData.summary || [],
+          supplementaryBudget: topicData.supplementary_budget,
+          totalBudgetAfter: topicData.total_budget_after,
+          stats: topicData.content_data?.stats,
+          keyAchievements: topicData.content_data?.key_achievements,
+          visualType: topicData.content_data?.visual_type || 'standard'
         };
+
+        console.log('✅ 整形後のデータ:', formattedData);
+        console.log('🔍 topics配列:', formattedData.topics);
+        if (formattedData.topics && formattedData.topics.length > 0) {
+          console.log('📍 最初のtopic:', formattedData.topics[0]);
+          console.log('📍 最初のtopicのitems:', formattedData.topics[0].items);
+        }
 
         setMeetingData(formattedData);
       }

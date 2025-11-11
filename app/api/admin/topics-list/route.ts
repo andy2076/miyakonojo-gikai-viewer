@@ -30,10 +30,15 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Failed to fetch all topics:', error);
       return NextResponse.json(
-        { error: 'トピック一覧の取得に失敗しました' },
+        { error: 'トピック一覧の取得に失敗しました', details: error.message },
         { status: 500 }
       );
     }
+
+    console.log('✅ トピック一覧取得成功:', {
+      total: data?.length || 0,
+      topics: data?.map(t => ({ id: t.id, meeting_title: t.meeting_title, published: t.published }))
+    });
 
     return NextResponse.json({
       topics: data || [],

@@ -389,6 +389,9 @@ export default function AdminCardsPage() {
                     議員名
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    質問タイトル
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     会議名
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -412,6 +415,18 @@ export default function AdminCardsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {card.member_name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      <div className="max-w-md">
+                        <div className="font-medium text-gray-900">
+                          {card.question_summary || card.theme_title || '-'}
+                        </div>
+                        {card.theme_title && card.question_summary && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            {card.theme_title}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-700">
                       {card.meeting_title || '-'}

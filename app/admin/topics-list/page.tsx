@@ -30,10 +30,13 @@ export default function TopicsListPage() {
       const response = await fetch('/api/admin/topics-list');
 
       if (!response.ok) {
-        throw new Error('トピック一覧の取得に失敗しました');
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.details || errorData.error || 'トピック一覧の取得に失敗しました');
       }
 
       const data = await response.json();
+      console.log('✅ フロント: トピックデータ取得成功', data);
       setTopics(data.topics || []);
     } catch (err) {
       console.error('Failed to fetch topics:', err);

@@ -34,11 +34,21 @@ function extractNounPhrase(title: string): string | null {
 
 /**
  * 会議名から年度を抽出する
- * 例: 「令和4年第2回定例会」→ 「令和4年」
+ * 例: 「令和４年第２回定例会」→ 「令和４年」（全角数字にも対応）
  */
 function extractYearFromMeeting(meetingTitle: string): string | null {
-  const match = meetingTitle.match(/(令和\d+年|平成\d+年)/);
-  return match ? match[1] : null;
+  // 全角数字を半角数字に変換
+  const normalized = meetingTitle.replace(/[０-９]/g, (s) => {
+    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+  });
+
+  const match = normalized.match(/(令和\d+年|平成\d+年)/);
+  if (!match) return null;
+
+  // 元の文字列から該当部分を抽出（全角のまま返す）
+  const yearPattern = match[1];
+  const fullWidthMatch = meetingTitle.match(new RegExp(yearPattern.replace(/\d/g, '[０-９\\d]')));
+  return fullWidthMatch ? fullWidthMatch[0] : match[1];
 }
 
 /**
