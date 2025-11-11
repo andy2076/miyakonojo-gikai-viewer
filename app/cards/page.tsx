@@ -407,7 +407,7 @@ function CardsPageContent() {
                         {card.themes.slice(0, 3).map((theme: any, idx: number) => (
                           <div key={idx} className="border-l-4 border-blue-500 pl-3 py-1">
                             <p className="text-base font-medium text-gray-900 leading-relaxed">
-                              {typeof theme === 'string' ? theme : (theme.theme_title || 'テーマ未設定')}
+                              {typeof theme === 'string' ? theme : (theme.question_point || theme.theme_title || 'テーマ未設定')}
                             </p>
                           </div>
                         ))}

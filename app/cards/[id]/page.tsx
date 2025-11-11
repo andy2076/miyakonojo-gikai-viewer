@@ -494,7 +494,7 @@ export default function CardDetailPage() {
               // 大項目でグループ化
               const groupedByMajor: Map<string, typeof card.themes> = new Map();
               card.themes.forEach((theme) => {
-                const { major } = parseThemeTitle(theme.theme_title || '');
+                const { major } = parseThemeTitle(theme.question_point || theme.theme_title || '');
                 if (!groupedByMajor.has(major)) {
                   groupedByMajor.set(major, []);
                 }
@@ -515,7 +515,7 @@ export default function CardDetailPage() {
                       {/* 小項目リスト */}
                       <div className="space-y-4">
                         {themes.map((theme, themeIdx) => {
-                          const { minor } = parseThemeTitle(theme.theme_title || '');
+                          const { minor } = parseThemeTitle(theme.question_point || theme.theme_title || '');
                           return (
                           <div key={themeIdx} className="bg-white rounded-lg p-5 border-2 border-purple-200 shadow-sm">
                       {/* テーマヘッダー */}
@@ -525,7 +525,7 @@ export default function CardDetailPage() {
                             テーマ {themeIdx + 1}
                           </span>
                           <span className="text-base font-bold text-purple-900">
-                            {minor || theme.theme_title || '（タイトルなし）'}
+                            {minor || theme.question_point || theme.theme_title || '（タイトルなし）'}
                           </span>
                         </div>
                       </div>
