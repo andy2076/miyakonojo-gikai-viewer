@@ -9,7 +9,7 @@ const mPlusRounded = M_PLUS_Rounded_1c({
 });
 
 export const metadata: Metadata = {
-  title: "みらい議会　都城市版",
+  title: "見える議会　都城市版",
   description: "都城市議会の質問と答弁を簡単に検索・閲覧できるサービス",
 };
 

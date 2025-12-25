@@ -205,7 +205,7 @@ export default function Home() {
             <Link href="/">
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer flex items-center gap-2">
                 <span className="text-3xl">🏛️</span>
-                みらい議会　都城市版
+                見える議会　都城市版
               </h1>
             </Link>
             <div className="flex items-center gap-4">
@@ -289,12 +289,12 @@ export default function Home() {
             {/* 右側：説明セクション */}
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">みらい議会って何？</h3>
+                <h3 className="text-xl font-bold text-gray-900">見える議会って何？</h3>
               </div>
 
               <div className="space-y-4 text-gray-900">
                 <p className="leading-relaxed">
-                  「みらい議会 都城」は、国政政党「チームみらい」が提供する「みらい議会」のコンセプトをお借りし、都城市議会版として開発したプラットフォームです。
+                  「見える議会 都城」は、市民に開かれた議会を実現するために開発したプラットフォームです。
                 </p>
                 <p className="leading-relaxed">
                   都城市議会での議論や議員の質問をわかりやすく伝え、従来市民に届きにくかった市議会の議論を可視化し、市政の透明性を高めることを目指しています。
@@ -323,7 +323,7 @@ export default function Home() {
                 </div>
 
                 <p className="text-xs text-gray-500 pt-4 border-t border-gray-200">
-                  ※ 本サービスは、国政政党「チームみらい」の「みらい議会」のコンセプトを参考に、独自に開発した地方議会向けプラットフォームです。
+                  ※ 本サービスはNPO法人よかまちLABOが独自に開発した地方議会向けプラットフォームです。
                 </p>
               </div>
             </div>
@@ -922,7 +922,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-gray-600 flex items-center justify-center gap-2">
             <span className="text-lg">🏛️</span>
-            みらい議会　都城市版 by NPO法人よかまちLABO
+            見える議会　都城市版 by NPO法人よかまちLABO
           </p>
           <p className="text-xs text-gray-500 mt-2">
             市民の皆様が議会の情報にアクセスしやすくなることを目指しています
