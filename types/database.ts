@@ -70,6 +70,7 @@ export interface Theme {
   answer_point: string;
   discussion_point: string | null;
   affected_people: string | null;
+  field_tag?: string | null;
 }
 
 /**

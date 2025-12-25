@@ -105,12 +105,11 @@ function CardsPageContent() {
 
   useEffect(() => {
     console.log('useEffect triggered with:', { meetingParam, categoryParam, keywordParam });
+    // 会期一覧は常に取得（カテゴリフィルターでも使用するため）
+    fetchMeetings();
     if (meetingParam || categoryParam || keywordParam) {
       console.log('Calling fetchCards()');
       fetchCards();
-    } else {
-      console.log('Calling fetchMeetings()');
-      fetchMeetings();
     }
   }, [meetingParam, categoryParam, keywordParam, fetchCards, fetchMeetings]);
 
@@ -310,7 +309,34 @@ function CardsPageContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* フィルター */}
         <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* 会期フィルター（カテゴリ・キーワード検索時のみ表示） */}
+            {(categoryParam || keywordParam) && (
+              <div>
+                <label htmlFor="meeting-filter" className="block text-sm font-medium text-gray-700 mb-1">
+                  会期で絞り込み
+                </label>
+                <select
+                  id="meeting-filter"
+                  value={meetingParam || ''}
+                  onChange={(e) => {
+                    const params = new URLSearchParams();
+                    if (categoryParam) params.append('category', categoryParam);
+                    if (keywordParam) params.append('keyword', keywordParam);
+                    if (e.target.value) params.append('meeting', e.target.value);
+                    router.push(`/cards?${params.toString()}`);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="">すべての会期</option>
+                  {meetings.map((meeting) => (
+                    <option key={meeting} value={meeting}>
+                      {meeting}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div>
               <label htmlFor="member-filter" className="block text-sm font-medium text-gray-700 mb-1">
                 議員名で絞り込み
@@ -404,18 +430,37 @@ function CardsPageContent() {
                     {card.themes && Array.isArray(card.themes) && card.themes.length > 0 ? (
                       <div className="space-y-3">
                         <h4 className="text-sm font-semibold text-gray-700 mb-3">主な質問テーマ</h4>
-                        {card.themes.slice(0, 3).map((theme: any, idx: number) => (
-                          <div key={idx} className="border-l-4 border-blue-500 pl-3 py-1">
-                            <p className="text-base font-medium text-gray-900 leading-relaxed">
-                              {typeof theme === 'string' ? theme : (theme.question_point || theme.theme_title || 'テーマ未設定')}
-                            </p>
-                          </div>
-                        ))}
-                        {card.themes.length > 3 && (
-                          <p className="text-sm text-gray-500 pl-3">
-                            他 {card.themes.length - 3} テーマ
-                          </p>
-                        )}
+                        {(() => {
+                          // カテゴリフィルターがある場合は該当テーマのみ表示
+                          const filteredThemes = categoryParam
+                            ? card.themes.filter((theme: any) => {
+                                const themeTags = theme.tags || [];
+                                const fieldTag = theme.field_tag || '';
+                                // タグ配列またはfield_tagにカテゴリが含まれるか
+                                return themeTags.some((t: string) => t.includes(categoryParam)) ||
+                                       fieldTag.includes(categoryParam);
+                              })
+                            : card.themes;
+
+                          const displayThemes = filteredThemes.length > 0 ? filteredThemes : card.themes;
+
+                          return (
+                            <>
+                              {displayThemes.slice(0, 3).map((theme: any, idx: number) => (
+                                <div key={idx} className="border-l-4 border-blue-500 pl-3 py-1">
+                                  <p className="text-base font-medium text-gray-900 leading-relaxed">
+                                    {typeof theme === 'string' ? theme : (theme.question_point || theme.theme_title || 'テーマ未設定')}
+                                  </p>
+                                </div>
+                              ))}
+                              {displayThemes.length > 3 && (
+                                <p className="text-sm text-gray-500 pl-3">
+                                  他 {displayThemes.length - 3} テーマ
+                                </p>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     ) : card.question_text && card.question_text.trim() ? (
                       /* themesがない場合は質問テキストを表示 */

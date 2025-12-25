@@ -24,11 +24,23 @@ export default function MeetingTopicsPage() {
   const [meetingData, setMeetingData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     fetchTopicData();
+    checkAdmin();
   }, [meetingId]);
+
+  const checkAdmin = async () => {
+    try {
+      const res = await fetch('/api/auth/check');
+      const data = await res.json();
+      setIsAdmin(data.isAdmin);
+    } catch {
+      setIsAdmin(false);
+    }
+  };
 
   const fetchTopicData = async () => {
     try {
@@ -87,6 +99,52 @@ export default function MeetingTopicsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // JSONダウンロード
+  const downloadJSON = () => {
+    if (!meetingData) return;
+    const dataStr = JSON.stringify(meetingData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${meetingId}_topics.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // CSVダウンロード（フラット化）
+  const downloadCSV = () => {
+    if (!meetingData) return;
+
+    const rows: string[][] = [];
+    rows.push(['カテゴリ', 'タイトル', '内容', '予算', '結果']);
+
+    meetingData.topics.forEach((topic: any) => {
+      topic.items.forEach((item: any) => {
+        rows.push([
+          topic.title,
+          item.subtitle || '',
+          (item.content || '').replace(/\n/g, ' '),
+          item.budget || item.contract_amount || '',
+          item.result || ''
+        ]);
+      });
+    });
+
+    const csvContent = rows.map(row =>
+      row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${meetingId}_topics.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const highlightText = (text: string) => {
@@ -166,8 +224,8 @@ export default function MeetingTopicsPage() {
       </header>
 
       <main className="container mx-auto px-4 py-12 max-w-5xl">
-        {/* 議会一覧へのリンク */}
-        <div className="mb-8">
+        {/* 議会一覧へのリンク & ダウンロードボタン */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <a
             href="/#meetings"
             className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium transition-colors"
@@ -175,6 +233,24 @@ export default function MeetingTopicsPage() {
             <span>←</span>
             <span>他の定例会を見る</span>
           </a>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <button
+                onClick={downloadCSV}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <span>📥</span>
+                CSV
+              </button>
+              <button
+                onClick={downloadJSON}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                <span>📥</span>
+                JSON
+              </button>
+            </div>
+          )}
         </div>
 
         {/* タイトルセクション */}

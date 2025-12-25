@@ -491,10 +491,10 @@ export default function CardDetailPage() {
                 return { major: title, minor: null };
               };
 
-              // 大項目でグループ化
+              // 大項目でグループ化（theme_titleを優先）
               const groupedByMajor: Map<string, typeof card.themes> = new Map();
               card.themes.forEach((theme) => {
-                const { major } = parseThemeTitle(theme.question_point || theme.theme_title || '');
+                const { major } = parseThemeTitle(theme.theme_title || '');
                 if (!groupedByMajor.has(major)) {
                   groupedByMajor.set(major, []);
                 }
@@ -515,20 +515,22 @@ export default function CardDetailPage() {
                       {/* 小項目リスト */}
                       <div className="space-y-4">
                         {themes.map((theme, themeIdx) => {
-                          const { minor } = parseThemeTitle(theme.question_point || theme.theme_title || '');
+                          const { minor } = parseThemeTitle(theme.theme_title || '');
                           return (
                           <div key={themeIdx} className="bg-white rounded-lg p-5 border-2 border-purple-200 shadow-sm">
-                      {/* テーマヘッダー */}
-                      <div className="mb-4 pb-3 border-b border-purple-100">
-                        <div className="flex items-baseline gap-2 flex-wrap">
-                          <span className="inline-block px-3 py-1 text-base font-bold text-white bg-purple-600 rounded-lg flex-shrink-0">
-                            テーマ {themeIdx + 1}
-                          </span>
-                          <span className="text-base font-bold text-purple-900">
-                            {minor || theme.question_point || theme.theme_title || '（タイトルなし）'}
-                          </span>
+                      {/* テーマヘッダー（小項目がある場合のみ表示） */}
+                      {minor && (
+                        <div className="mb-4 pb-3 border-b border-purple-100">
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            <span className="inline-block px-3 py-1 text-base font-bold text-white bg-purple-600 rounded-lg flex-shrink-0">
+                              テーマ {themeIdx + 1}
+                            </span>
+                            <span className="text-base font-bold text-purple-900">
+                              {minor}
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* 質問のポイント */}
                       {theme.question_point && (
@@ -559,6 +561,15 @@ export default function CardDetailPage() {
                               />
                             </div>
                           </div>
+                        </div>
+                      )}
+
+                      {/* 分野タグ */}
+                      {theme.field_tag && (
+                        <div className="mb-3">
+                          <span className="inline-block px-3 py-1 text-xs font-bold text-white bg-indigo-500 rounded-full">
+                            🏷️ {theme.field_tag}
+                          </span>
                         </div>
                       )}
 
