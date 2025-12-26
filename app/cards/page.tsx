@@ -303,6 +303,19 @@ function CardsPageContent() {
           <p className="mt-2 text-gray-600">
             {categoryParam ? '分野別の質問カード一覧' : keywordParam ? 'キーワードに関連する質問カード一覧' : 'この議会の質問カード一覧'}
           </p>
+          {/* 可決トピックへのリンク（議会表示時のみ） */}
+          {meetingParam && !categoryParam && !keywordParam && (
+            <Link
+              href={`/meetings/${encodeURIComponent(meetingParam)}/topics`}
+              className="inline-flex items-center mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+            >
+              <span className="mr-2">📋</span>
+              この議会の可決トピックを見る
+              <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          )}
         </div>
       </header>
 
