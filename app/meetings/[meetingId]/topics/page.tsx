@@ -202,7 +202,7 @@ export default function MeetingTopicsPage() {
             <Link href="/">
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer flex items-center gap-2">
                 <span className="text-3xl">🏛️</span>
-                見える議会　都城市版
+                みえる議会　都城市版
               </h1>
             </Link>
             <div className="flex items-center gap-4">

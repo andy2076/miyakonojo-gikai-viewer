@@ -205,7 +205,7 @@ export default function Home() {
             <Link href="/">
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer flex items-center gap-2">
                 <span className="text-3xl">🏛️</span>
-                見える議会　都城市版
+                みえる議会　都城市版
               </h1>
             </Link>
             <div className="flex items-center gap-4">
@@ -289,12 +289,12 @@ export default function Home() {
             {/* 右側：説明セクション */}
             <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">見える議会って何？</h3>
+                <h3 className="text-xl font-bold text-gray-900">みえる議会って何？</h3>
               </div>
 
               <div className="space-y-4 text-gray-900">
                 <p className="leading-relaxed">
-                  「見える議会 都城」は、市民に開かれた議会を実現するために開発したプラットフォームです。
+                  「みえる議会 都城」は、市民に開かれた議会を実現するために開発したプラットフォームです。
                 </p>
                 <p className="leading-relaxed">
                   都城市議会での議論や議員の質問をわかりやすく伝え、従来市民に届きにくかった市議会の議論を可視化し、市政の透明性を高めることを目指しています。
@@ -922,7 +922,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-gray-600 flex items-center justify-center gap-2">
             <span className="text-lg">🏛️</span>
-            見える議会　都城市版 by NPO法人よかまちLABO
+            みえる議会　都城市版 by NPO法人よかまちLABO
           </p>
           <p className="text-xs text-gray-500 mt-2">
             市民の皆様が議会の情報にアクセスしやすくなることを目指しています
