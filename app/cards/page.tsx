@@ -363,7 +363,7 @@ function CardsPageContent() {
                   setMemberFilter(e.target.value);
                   setOffset(0); // フィルター変更時は最初のページに戻る
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500"
               />
             </div>
             <form onSubmit={handleSearch}>
@@ -377,7 +377,7 @@ function CardsPageContent() {
                   placeholder="例: 教育、防災、高齢者"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500"
                 />
                 <button
                   type="submit"
