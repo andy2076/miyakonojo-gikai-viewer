@@ -357,7 +357,7 @@ function CardsPageContent() {
               <input
                 id="member-filter"
                 type="text"
-                placeholder="例: 音堅良一"
+                placeholder="議員名を入力"
                 value={memberFilter}
                 onChange={(e) => {
                   setMemberFilter(e.target.value);
