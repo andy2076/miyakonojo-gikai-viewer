@@ -41,9 +41,6 @@ function CardsPageContent() {
 
   // 議会一覧を取得
   const fetchMeetings = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
     try {
       const res = await fetch('/api/card-meetings');
       if (!res.ok) {
@@ -53,64 +50,68 @@ function CardsPageContent() {
       setMeetings(data.meetings || []);
     } catch (err) {
       console.error('Failed to fetch meetings:', err);
-      setError(err instanceof Error ? err.message : '不明なエラー');
-    } finally {
-      setLoading(false);
+      throw err;
     }
   }, []);
 
   // カードを取得
   const fetchCards = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      offset: offset.toString(),
+    });
 
-    try {
-      const params = new URLSearchParams({
-        limit: limit.toString(),
-        offset: offset.toString(),
-      });
+    if (meetingParam) params.append('meeting', meetingParam);
+    if (categoryParam) params.append('category', categoryParam); // 分野カテゴリ
+    if (keywordParam) params.append('keyword', keywordParam); // キーワード検索
+    if (memberFilter) params.append('member', memberFilter);
 
-      if (meetingParam) params.append('meeting', meetingParam);
-      if (categoryParam) params.append('category', categoryParam); // 分野カテゴリ
-      if (keywordParam) params.append('keyword', keywordParam); // キーワード検索
-      if (memberFilter) params.append('member', memberFilter);
-
-      // 絶対URLを使用してキャッシュを回避
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const apiUrl = `${baseUrl}/api/cards?${params.toString()}`;
-      console.log('Fetching cards from:', apiUrl);
-      const res = await fetch(apiUrl, {
-        cache: 'no-store',
-        next: { revalidate: 0 },
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache'
-        }
-      });
-
-      if (!res.ok) {
-        throw new Error('カードの取得に失敗しました');
+    // 絶対URLを使用してキャッシュを回避
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const apiUrl = `${baseUrl}/api/cards?${params.toString()}`;
+    console.log('Fetching cards from:', apiUrl);
+    const res = await fetch(apiUrl, {
+      cache: 'no-store',
+      next: { revalidate: 0 },
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
       }
+    });
 
-      const data: CardsResponse = await res.json();
-      setCards(data.cards);
-      setTotal(data.total);
-    } catch (err) {
-      console.error('Failed to fetch cards:', err);
-      setError(err instanceof Error ? err.message : '不明なエラー');
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      throw new Error('カードの取得に失敗しました');
     }
+
+    const data: CardsResponse = await res.json();
+    setCards(data.cards);
+    setTotal(data.total);
   }, [limit, offset, meetingParam, categoryParam, keywordParam, memberFilter]);
 
   useEffect(() => {
     console.log('useEffect triggered with:', { meetingParam, categoryParam, keywordParam });
-    // 会期一覧は常に取得（カテゴリフィルターでも使用するため）
-    fetchMeetings();
-    if (meetingParam || categoryParam || keywordParam) {
-      console.log('Calling fetchCards()');
-      fetchCards();
-    }
+
+    const loadData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        if (meetingParam || categoryParam || keywordParam) {
+          // 会期一覧とカードを並行で取得
+          console.log('Calling fetchCards()');
+          await Promise.all([fetchMeetings(), fetchCards()]);
+        } else {
+          // 会期一覧のみ取得
+          await fetchMeetings();
+        }
+      } catch (err) {
+        console.error('Data loading error:', err);
+        setError(err instanceof Error ? err.message : '不明なエラー');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [meetingParam, categoryParam, keywordParam, fetchCards, fetchMeetings]);
 
   // 分野内キーワード検索ハンドラー

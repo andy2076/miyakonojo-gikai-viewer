@@ -274,6 +274,9 @@ export default function Home() {
                     </button>
                   </div>
                 </form>
+                <p className="mt-2 text-sm text-white/70">
+                  ※ 質問内容から検索します。議員名での検索はできません。
+                </p>
 
                 {/* 次回会期日程 */}
                 <div className="mt-8 text-right">
