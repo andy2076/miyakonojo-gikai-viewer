@@ -283,7 +283,7 @@ export default function Home() {
                   <p className="text-sm text-white/90">
                     <span className="font-semibold">次回会期：</span>
                     <br />
-                    ２月２１日（金曜日）から３月２０日（木曜日）まで（予定）
+                    ２月２０日（金）から３月２４日（火）まで
                   </p>
                 </div>
               </div>
