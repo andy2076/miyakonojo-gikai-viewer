@@ -5,15 +5,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
-import { createClient } from '@supabase/supabase-js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
-
-// Supabaseクライアントの初期化
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export default function MeetingTopicsPage() {
   const params = useParams();
@@ -46,31 +39,15 @@ export default function MeetingTopicsPage() {
     try {
       setLoading(true);
 
-      console.log('🔍 Fetching data for meetingId:', meetingId);
+      // APIルート経由でデータ取得
+      const res = await fetch(`/api/topics?meeting_title=${encodeURIComponent(meetingId)}`);
+      if (!res.ok) throw new Error('データの取得に失敗しました');
 
-      // meeting_topicsテーブルからmeeting_titleで検索
-      const { data, error } = await supabase
-        .from('meeting_topics')
-        .select('*')
-        .eq('meeting_title', meetingId)
-        .eq('published', true)
-        .order('display_order', { ascending: true })
-        .limit(1);
-
-      console.log('📦 Raw data from Supabase:', data);
-      console.log('❗ Error:', error);
-
-      if (error) throw error;
-
-      const topicData = data?.[0];
-      console.log('📋 topicData (first element):', topicData);
+      const result = await res.json();
+      const topics = result.topics || result;
+      const topicData = Array.isArray(topics) ? topics[0] : topics;
 
       if (topicData) {
-        console.log('📥 取得したデータ:', topicData);
-        console.log('📋 content_data:', topicData.content_data);
-        console.log('📌 topics:', topicData.content_data?.topics);
-
-        // データを整形
         const formattedData = {
           title: topicData.title,
           date: topicData.date || meetingId,
@@ -83,13 +60,6 @@ export default function MeetingTopicsPage() {
           keyAchievements: topicData.content_data?.key_achievements,
           visualType: topicData.content_data?.visual_type || 'standard'
         };
-
-        console.log('✅ 整形後のデータ:', formattedData);
-        console.log('🔍 topics配列:', formattedData.topics);
-        if (formattedData.topics && formattedData.topics.length > 0) {
-          console.log('📍 最初のtopic:', formattedData.topics[0]);
-          console.log('📍 最初のtopicのitems:', formattedData.topics[0].items);
-        }
 
         setMeetingData(formattedData);
       }

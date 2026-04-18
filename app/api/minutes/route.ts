@@ -1,40 +1,20 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import pool from '@/lib/db';
 
 /**
- * 公開議事録一覧取得API（一般ユーザー向け）
+ * 公開議事録一覧取得API
  */
 export async function GET() {
   try {
-    // Supabase設定チェック
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabaseが設定されていません' },
-        { status: 503 }
-      );
-    }
+    const result = await pool.query(
+      `SELECT id, file_name, meeting_date, meeting_title, uploaded_at, analysis_data
+       FROM minutes_files
+       WHERE processed = true AND published = true
+       ORDER BY meeting_date DESC NULLS LAST, uploaded_at DESC`
+    );
 
-    // 公開されている議事録のみを取得
-    const { data: minutes, error } = await supabase
-      .from('minutes_files')
-      .select('id, file_name, meeting_date, meeting_title, uploaded_at, analysis_data')
-      .eq('processed', true)
-      .eq('published', true)
-      .order('meeting_date', { ascending: false, nullsFirst: false })
-      .order('uploaded_at', { ascending: false });
-
-    if (error) {
-      console.error('Failed to fetch minutes:', error);
-      return NextResponse.json(
-        { error: '議事録の取得に失敗しました' },
-        { status: 500 }
-      );
-    }
-
-    // レスポンスデータを整形
-    const formattedMinutes = minutes.map((minute) => {
-      const analysisData = minute.analysis_data as any;
-
+    const formattedMinutes = result.rows.map((minute: any) => {
+      const analysisData = minute.analysis_data;
       return {
         id: minute.id,
         fileName: minute.file_name,
@@ -51,15 +31,9 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({
-      success: true,
-      data: formattedMinutes,
-    });
+    return NextResponse.json({ success: true, data: formattedMinutes });
   } catch (error) {
     console.error('Error fetching minutes:', error);
-    return NextResponse.json(
-      { error: '議事録の取得中にエラーが発生しました' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '議事録の取得中にエラーが発生しました' }, { status: 500 });
   }
 }

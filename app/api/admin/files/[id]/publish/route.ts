@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import pool from '@/lib/db';
 
 /**
  * ファイル公開/非公開切り替えAPI
@@ -11,63 +11,30 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-
-    // 認証チェック
     const session = await getSession();
     if (!session) {
-      return NextResponse.json(
-        { error: '認証が必要です' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
 
-    // Supabase設定チェック
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabaseが設定されていません' },
-        { status: 503 }
-      );
-    }
-
-    // リクエストボディから公開フラグを取得
     const body = await request.json();
     const { published } = body;
 
     if (typeof published !== 'boolean') {
-      return NextResponse.json(
-        { error: 'published フラグが必要です' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'published フラグが必要です' }, { status: 400 });
     }
 
-    // ファイル情報を更新
-    const { data, error } = await supabase
-      .from('minutes_files')
-      .update({ published })
-      .eq('id', id)
-      .select()
-      .single();
+    const result = await pool.query(
+      'UPDATE minutes_files SET published = $1, updated_at = NOW() WHERE id = $2 RETURNING id, published',
+      [published, id]
+    );
 
-    if (error) {
-      console.error('Failed to update published status:', error);
-      return NextResponse.json(
-        { error: '公開状態の更新に失敗しました' },
-        { status: 500 }
-      );
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: 'ファイルが見つかりません' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: data.id,
-        published: data.published,
-      },
-    });
+    return NextResponse.json({ success: true, data: result.rows[0] });
   } catch (error) {
     console.error('Error updating publish status:', error);
-    return NextResponse.json(
-      { error: '公開状態の更新中にエラーが発生しました' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '公開状態の更新中にエラーが発生しました' }, { status: 500 });
   }
 }

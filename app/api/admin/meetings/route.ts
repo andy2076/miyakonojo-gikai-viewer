@@ -1,53 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import pool from '@/lib/db';
 
 /**
  * 議会日程一覧取得API
  */
 export async function GET(request: NextRequest) {
   try {
-    // 認証チェック
     const session = await getSession();
     if (!session) {
-      return NextResponse.json(
-        { error: '認証が必要です' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
 
-    // Supabase設定チェック
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabaseが設定されていません' },
-        { status: 503 }
-      );
-    }
+    const result = await pool.query(
+      'SELECT * FROM meetings ORDER BY display_order ASC, meeting_date DESC NULLS LAST'
+    );
 
-    // 議会日程を取得（display_order順）
-    const { data: meetings, error } = await supabase
-      .from('meetings')
-      .select('*')
-      .order('display_order', { ascending: true })
-      .order('meeting_date', { ascending: false });
-
-    if (error) {
-      console.error('Failed to fetch meetings:', error);
-      return NextResponse.json(
-        { error: '議会日程の取得に失敗しました' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      meetings: meetings || [],
-    });
+    return NextResponse.json({ meetings: result.rows });
   } catch (error) {
     console.error('Get meetings error:', error);
-    return NextResponse.json(
-      { error: '議会日程の取得中にエラーが発生しました' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '議会日程の取得中にエラーが発生しました' }, { status: 500 });
   }
 }
 
@@ -56,64 +28,26 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    // 認証チェック
     const session = await getSession();
     if (!session) {
-      return NextResponse.json(
-        { error: '認証が必要です' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
 
-    // Supabase設定チェック
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json(
-        { error: 'Supabaseが設定されていません' },
-        { status: 503 }
-      );
-    }
-
-    // リクエストボディを取得
     const body = await request.json();
     const { title, meeting_date, description, published, display_order } = body;
 
-    // バリデーション
     if (!title) {
-      return NextResponse.json(
-        { error: 'タイトルは必須です' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'タイトルは必須です' }, { status: 400 });
     }
 
-    // 議会日程を作成
-    const { data: meeting, error } = await supabase
-      .from('meetings')
-      .insert({
-        title,
-        meeting_date: meeting_date || null,
-        description: description || null,
-        published: published ?? false,
-        display_order: display_order ?? 0,
-      })
-      .select()
-      .single();
+    const result = await pool.query(
+      `INSERT INTO meetings (title, meeting_date, description, published, display_order) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [title, meeting_date || null, description || null, published ?? false, display_order ?? 0]
+    );
 
-    if (error) {
-      console.error('Failed to create meeting:', error);
-      return NextResponse.json(
-        { error: '議会日程の作成に失敗しました' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      meeting,
-    });
+    return NextResponse.json({ meeting: result.rows[0] });
   } catch (error) {
     console.error('Create meeting error:', error);
-    return NextResponse.json(
-      { error: '議会日程の作成中にエラーが発生しました' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '議会日程の作成中にエラーが発生しました' }, { status: 500 });
   }
 }
