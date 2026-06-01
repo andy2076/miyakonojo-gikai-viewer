@@ -227,7 +227,7 @@ export default function CardDetailPage() {
 
   const mainTopicStyle = getMainTopicStyle();
   // DBから取得した要約を使用、なければフロントエンドで生成
-  const questionSummary = card.question_summary || getQuestionSummary(card.question_text);
+  const questionSummary = card.question_summary || (card.question_text ? getQuestionSummary(card.question_text) : '');
   const answerSummary = card.answer_summary || getAnswerSummary(card.answer_texts || []);
 
   // 構造化された答弁要約をパース（新形式はJSON、旧形式はプレーンテキスト）
@@ -238,7 +238,7 @@ export default function CardDetailPage() {
     // 旧形式（プレーンテキスト）の場合はnullのまま
   }
 
-  const isQuestionLong = card.question_text.length > 300;
+  const isQuestionLong = (card.question_text || '').length > 300;
   const areAnswersLong = (card.answer_texts || []).some(a => a.length > 300);
 
   return (
