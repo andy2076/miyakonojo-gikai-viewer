@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "import-topic": "tsx scripts/import-topic.ts",
     "import-topic-v2": "tsx scripts/import-topic-v2.ts"
