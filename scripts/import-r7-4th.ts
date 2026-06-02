@@ -66,6 +66,14 @@ async function main() {
     const raw = fs.readFileSync(jsonPath, 'utf-8');
     const data: JsonData = JSON.parse(raw);
 
+    // 半角数字を全角に変換（既存データとの整合性）
+    const toFullWidth = (s: string) =>
+      s.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
+    data.meeting = toFullWidth(data.meeting);
+    for (const card of data.cards) {
+      card.meeting = toFullWidth(card.meeting);
+    }
+
     console.log(`=== ${data.meeting} インポート開始 ===`);
     console.log(`カード数: ${data.card_count}`);
 
