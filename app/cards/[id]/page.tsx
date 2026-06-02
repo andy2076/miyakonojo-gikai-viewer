@@ -512,6 +512,26 @@ export default function CardDetailPage() {
                         {majorTitle || '（タイトルなし）'}
                       </h4>
 
+                      {/* 質問項目（subtopics） */}
+                      {themes[0]?.subtopics && themes[0].subtopics.length > 0 && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg px-5 py-4">
+                          <p className="text-sm font-bold text-blue-800 mb-2 flex items-center">
+                            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            質問項目
+                          </p>
+                          <ul className="space-y-1">
+                            {themes[0].subtopics.map((sub: string, subIdx: number) => (
+                              <li key={subIdx} className="text-sm text-gray-700 flex items-start">
+                                <span className="text-blue-400 mr-2 mt-0.5 flex-shrink-0">▸</span>
+                                <span dangerouslySetInnerHTML={{ __html: getHighlightedHTML(sub, searchKeyword) }} />
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
                       {/* 小項目リスト */}
                       <div className="space-y-4">
                         {themes.map((theme, themeIdx) => {

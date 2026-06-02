@@ -66,6 +66,7 @@ export interface FileStats {
 export interface Theme {
   theme_number: string;
   theme_title: string;
+  subtopics?: string[];
   question_point: string;
   answer_point: string;
   discussion_point: string | null;

@@ -20,6 +20,7 @@ const pool = new Pool({
 
 interface TopicInput {
   title: string;
+  subtopics?: string[];
   category: string[];
   question: string;
   answer: string;
@@ -138,6 +139,7 @@ async function main() {
 
           return {
             theme_title: t.title,
+            subtopics: t.subtopics || [],
             question_point: t.question,
             answer_point: t.answer,
             discussion_point: '',
