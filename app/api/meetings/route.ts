@@ -17,19 +17,21 @@ export async function GET(request: NextRequest) {
     );
 
     // meeting_titleごとにグループ化
-    const meetingMap = new Map<string, { title: string; date: string | null; cardCount: number }>();
+    const meetingMap = new Map<string, { title: string; date: string | null; cardCount: number; hasTopics: boolean }>();
 
     // meeting_topicsの会議を追加
     topicsResult.rows.forEach((topic: any) => {
       if (!meetingMap.has(topic.meeting_title)) {
-        meetingMap.set(topic.meeting_title, { title: topic.meeting_title, date: null, cardCount: 0 });
+        meetingMap.set(topic.meeting_title, { title: topic.meeting_title, date: null, cardCount: 0, hasTopics: true });
       }
     });
 
-    // question_cardsからカード数をカウント
+    // question_cardsからカード数をカウント（meeting_topicsにない会議も追加）
     cardsResult.rows.forEach((card: any) => {
       const title = card.meeting_title;
-      if (meetingMap.has(title)) {
+      if (!meetingMap.has(title)) {
+        meetingMap.set(title, { title, date: card.meeting_date, cardCount: 1, hasTopics: false });
+      } else {
         meetingMap.get(title)!.cardCount++;
         if (!meetingMap.get(title)!.date && card.meeting_date) {
           meetingMap.get(title)!.date = card.meeting_date;

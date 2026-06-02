@@ -9,6 +9,7 @@ interface Meeting {
   title: string;
   date: string | null;
   cardCount: number;
+  hasTopics?: boolean;
 }
 
 interface QuestionCard {
@@ -278,12 +279,12 @@ export default function Home() {
                   ※ 質問内容から検索します。議員名での検索はできません。
                 </p>
 
-                {/* 次回会期日程 */}
+                {/* 最新会期 */}
                 <div className="mt-8 text-right">
                   <p className="text-sm text-white/90">
-                    <span className="font-semibold">次回会期：</span>
+                    <span className="font-semibold">最新データ：</span>
                     <br />
-                    ２月２０日（金）から３月２４日（火）まで
+                    令和７年第４回定例会（１２月）
                   </p>
                 </div>
               </div>
@@ -822,6 +823,7 @@ export default function Home() {
                           />
                         </svg>
                       </Link>
+                      {meeting.hasTopics !== false && (
                       <Link
                         href={`/meetings/${encodeURIComponent(meeting.title)}/topics`}
                         className="flex items-center justify-center px-4 py-3 bg-white border-2 border-purple-600 text-purple-600 font-medium rounded-lg hover:bg-purple-600 hover:text-white transition-all shadow-md hover:shadow-lg"
@@ -841,6 +843,7 @@ export default function Home() {
                           />
                         </svg>
                       </Link>
+                      )}
                     </div>
                   </div>
                 </div>
