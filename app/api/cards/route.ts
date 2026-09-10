@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { expandCategory } from '@/lib/field-categories';
 
 /**
  * 公開されている質問カードを取得するAPI
@@ -35,12 +36,27 @@ export async function GET(request: NextRequest) {
     }
 
     if (category) {
-      conditions.push(`gpt_field_tags @> $${paramIndex++}::jsonb`);
-      params.push(JSON.stringify([category]));
+      // 12分野名は対応する短いタグにも展開して検索する（会期により表記が異なるため）
+      const tags = expandCategory(category);
+      const ors = tags.map((tag) => {
+        params.push(JSON.stringify([tag]));
+        return `gpt_field_tags @> $${paramIndex++}::jsonb`;
+      });
+      // themes[].field_tag に12分野名が入っている会期（令和7年第4回以降）にも対応
+      params.push(JSON.stringify([{ field_tag: category }]));
+      ors.push(`themes @> $${paramIndex++}::jsonb`);
+      conditions.push(`(${ors.join(' OR ')})`);
     }
 
     if (keyword) {
-      conditions.push(`(question_text ILIKE $${paramIndex} OR full_content ILIKE $${paramIndex})`);
+      // 令和7年第4回以降のカードは question_text / full_content を持たず
+      // 内容がすべて themes に入っているため、themes も検索対象に含める
+      conditions.push(
+        `(question_text ILIKE $${paramIndex}` +
+          ` OR full_content ILIKE $${paramIndex}` +
+          ` OR question_summary ILIKE $${paramIndex}` +
+          ` OR themes::text ILIKE $${paramIndex})`
+      );
       params.push(`%${keyword}%`);
       paramIndex++;
     }

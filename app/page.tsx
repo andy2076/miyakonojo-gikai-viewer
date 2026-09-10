@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { FIELD_CATEGORIES } from '@/lib/field-categories';
 
 interface Meeting {
   title: string;
@@ -197,6 +198,19 @@ export default function Home() {
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   };
 
+  // 最新データの表記（議会一覧は /api/meetings 側で新しい順にソート済み）
+  const toFullWidthDigits = (value: string) =>
+    value.replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
+
+  const latestMeeting = meetings[0] ?? null;
+  const latestMeetingLabel = (() => {
+    if (!latestMeeting) return null;
+    if (!latestMeeting.date) return latestMeeting.title;
+    // 日付はUTCで返るため、JSTに直してから「月」を取り出す
+    const jst = new Date(new Date(latestMeeting.date).getTime() + 9 * 60 * 60 * 1000);
+    return `${latestMeeting.title}（${toFullWidthDigits(String(jst.getUTCMonth() + 1))}月）`;
+  })();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* ヘッダー */}
@@ -284,7 +298,7 @@ export default function Home() {
                   <p className="text-sm text-white/90">
                     <span className="font-semibold">最新データ：</span>
                     <br />
-                    令和７年第４回定例会（１２月）
+                    {latestMeetingLabel ?? '準備中'}
                   </p>
                 </div>
               </div>
@@ -338,20 +352,7 @@ export default function Home() {
         <section className="mb-16">
           <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">分野から探す</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              { name: '子育て・教育', icon: '👶', color: 'from-blue-500 to-indigo-500' },
-              { name: '地域振興', icon: '🏘️', color: 'from-green-500 to-emerald-500' },
-              { name: '防災・減災', icon: '🚨', color: 'from-red-500 to-orange-500' },
-              { name: 'デジタル化推進', icon: '💻', color: 'from-cyan-500 to-blue-500' },
-              { name: '農業・畜産', icon: '🌾', color: 'from-amber-500 to-yellow-500' },
-              { name: '環境・エネルギー', icon: '🌱', color: 'from-lime-500 to-green-500' },
-              { name: '福祉', icon: '🤝', color: 'from-pink-500 to-rose-500' },
-              { name: '高齢者福祉', icon: '👴', color: 'from-purple-400 to-pink-400' },
-              { name: '男女共同参画', icon: '⚖️', color: 'from-violet-500 to-purple-500' },
-              { name: '行政改革', icon: '🏛️', color: 'from-slate-500 to-gray-600' },
-              { name: '医療・健康', icon: '🏥', color: 'from-teal-500 to-cyan-500' },
-              { name: '都市計画', icon: '🏗️', color: 'from-stone-500 to-zinc-500' },
-            ].map((category) => (
+            {FIELD_CATEGORIES.map((category) => (
               <Link
                 key={category.name}
                 href={`/cards?category=${encodeURIComponent(category.name)}`}
@@ -391,12 +392,16 @@ export default function Home() {
                   stats.memberThemeRankingByYear?.forEach((d) => years.add(d.year));
 
                   // 年度順にソート（新しい順）
+                  const toYearNum = (y: string) =>
+                    parseInt(
+                      y
+                        .replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+                        .match(/\d+/)?.[0] || '0',
+                      10
+                    );
+
                   return Array.from(years)
-                    .sort((a, b) => {
-                      const yearNumA = parseInt(a.match(/\d+/)?.[0] || '0', 10);
-                      const yearNumB = parseInt(b.match(/\d+/)?.[0] || '0', 10);
-                      return yearNumB - yearNumA;
-                    })
+                    .sort((a, b) => toYearNum(b) - toYearNum(a))
                     .map((year) => (
                       <option key={year} value={year}>
                         {year}
@@ -725,7 +730,8 @@ export default function Home() {
               'text-orange-600',    // 令和2年
               'text-pink-600',      // 令和1年/元年
             ];
-            return colors[(5 - yearNum) % colors.length] || 'text-gray-900';
+            const idx = ((yearNum % colors.length) + colors.length) % colors.length;
+            return colors[idx] || 'text-gray-900';
           };
 
           // すべての年度を抽出してユニークなリストを作成

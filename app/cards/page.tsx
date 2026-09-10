@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { QuestionCardRecord } from '@/types/database';
+import { themeMatchesCategory } from '@/lib/field-categories';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,9 @@ function CardsPageContent() {
 
   // 議会一覧
   const [meetings, setMeetings] = useState<string[]>([]);
+
+  // 表示中の会期に可決トピックがあるか
+  const [hasTopics, setHasTopics] = useState(false);
 
   // フィルター状態
   const [memberFilter, setMemberFilter] = useState('');
@@ -88,6 +92,26 @@ function CardsPageContent() {
     setTotal(data.total);
   }, [limit, offset, meetingParam, categoryParam, keywordParam, memberFilter]);
 
+  // 可決トピックの有無を確認（トピックがない会期はリンクを出さない）
+  useEffect(() => {
+    if (!meetingParam) {
+      setHasTopics(false);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/topics?meeting_title=${encodeURIComponent(meetingParam)}`)
+      .then((res) => (res.ok ? res.json() : { total: 0 }))
+      .then((data) => {
+        if (!cancelled) setHasTopics((data.total || 0) > 0);
+      })
+      .catch(() => {
+        if (!cancelled) setHasTopics(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [meetingParam]);
+
   useEffect(() => {
     console.log('useEffect triggered with:', { meetingParam, categoryParam, keywordParam });
 
@@ -143,6 +167,15 @@ function CardsPageContent() {
       day: 'numeric',
     });
   };
+
+  // 表示中のカードに答弁が1件も入っていない＝会議録未公開の会期
+  const answersPending =
+    cards.length > 0 &&
+    cards.every((card) =>
+      Array.isArray(card.themes) &&
+      card.themes.length > 0 &&
+      card.themes.every((theme) => !theme.answer_point || theme.answer_point.trim() === '')
+    );
 
   // 会派別の色を取得
   const getFactionColor = (faction: string | null) => {
@@ -305,7 +338,7 @@ function CardsPageContent() {
             {categoryParam ? '分野別の質問カード一覧' : keywordParam ? 'キーワードに関連する質問カード一覧' : 'この議会の質問カード一覧'}
           </p>
           {/* 可決トピックへのリンク（議会表示時のみ） */}
-          {meetingParam && !categoryParam && !keywordParam && (
+          {meetingParam && hasTopics && !categoryParam && !keywordParam && (
             <Link
               href={`/meetings/${encodeURIComponent(meetingParam)}/topics`}
               className="inline-flex items-center mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
@@ -394,6 +427,13 @@ function CardsPageContent() {
           <div className="mt-4 text-sm text-gray-600">
             {total > 0 ? `${total}件の質問カードが見つかりました` : '質問カードが見つかりませんでした'}
           </div>
+
+          {/* 答弁未収録（会議録公開前）の会期のお知らせ */}
+          {answersPending && (
+            <div className="mt-4 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+              この会期は会議録がまだ公開されていないため、一般質問通告書の内容（質問項目）のみを掲載しています。答弁の要点は会議録の公開後に反映します。
+            </div>
+          )}
         </div>
 
         {/* カード一覧 */}
@@ -447,13 +487,9 @@ function CardsPageContent() {
                         {(() => {
                           // カテゴリフィルターがある場合は該当テーマのみ表示
                           const filteredThemes = categoryParam
-                            ? card.themes.filter((theme: any) => {
-                                const themeTags = theme.tags || [];
-                                const fieldTag = theme.field_tag || '';
-                                // タグ配列またはfield_tagにカテゴリが含まれるか
-                                return themeTags.some((t: string) => t.includes(categoryParam)) ||
-                                       fieldTag.includes(categoryParam);
-                              })
+                            ? card.themes.filter((theme: any) =>
+                                themeMatchesCategory(theme, categoryParam)
+                              )
                             : card.themes;
 
                           const displayThemes = filteredThemes.length > 0 ? filteredThemes : card.themes;

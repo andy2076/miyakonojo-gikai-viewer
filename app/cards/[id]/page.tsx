@@ -584,6 +584,21 @@ export default function CardDetailPage() {
                         </div>
                       )}
 
+                      {/* 答弁がまだ収録されていない場合（会議録公開前） */}
+                      {!theme.answer_point && (
+                        <div className="mb-3">
+                          <div className="flex items-start">
+                            <span className="inline-block px-2 py-1 text-xs font-bold text-white bg-gray-400 rounded mr-2 flex-shrink-0">A</span>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-gray-600 mb-1">回答のポイント</p>
+                              <p className="text-gray-600 text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                                この会期の会議録はまだ公開されていません。答弁の要点は会議録の公開後に反映します（現在は一般質問通告書の内容のみ掲載しています）。
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* 分野タグ */}
                       {theme.field_tag && (
                         <div className="mb-3">

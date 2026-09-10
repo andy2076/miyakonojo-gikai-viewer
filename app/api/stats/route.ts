@@ -27,6 +27,16 @@ function extractNounPhrase(title: string): string | null {
 }
 
 /**
+ * 「令和８年」のような全角数字を含む年表記を数値に変換する
+ */
+function yearToNumber(year: string): number {
+  const normalized = year.replace(/[０-９]/g, (c) =>
+    String.fromCharCode(c.charCodeAt(0) - 0xFEE0)
+  );
+  return parseInt(normalized.match(/\d+/)?.[0] || '0', 10);
+}
+
+/**
  * 会議名から年度を抽出する
  */
 function extractYearFromMeeting(meetingTitle: string): string | null {
@@ -107,9 +117,7 @@ export async function GET() {
     }));
 
     fieldTagRankingByYear.sort((a, b) => {
-      const yearNumA = parseInt(a.year.match(/\d+/)?.[0] || '0', 10);
-      const yearNumB = parseInt(b.year.match(/\d+/)?.[0] || '0', 10);
-      return yearNumB - yearNumA;
+      return yearToNumber(b.year) - yearToNumber(a.year);
     });
 
     // 2. 質問テーマ数ランキング（議員別・年度別）
@@ -137,9 +145,7 @@ export async function GET() {
     }));
 
     memberThemeRankingByYear.sort((a, b) => {
-      const yearNumA = parseInt(a.year.match(/\d+/)?.[0] || '0', 10);
-      const yearNumB = parseInt(b.year.match(/\d+/)?.[0] || '0', 10);
-      return yearNumB - yearNumA;
+      return yearToNumber(b.year) - yearToNumber(a.year);
     });
 
     // 3. 最新会議の質問テーマカテゴリ
@@ -193,9 +199,7 @@ export async function GET() {
     }));
 
     keywordRankingByYear.sort((a, b) => {
-      const yearNumA = parseInt(a.year.match(/\d+/)?.[0] || '0', 10);
-      const yearNumB = parseInt(b.year.match(/\d+/)?.[0] || '0', 10);
-      return yearNumB - yearNumA;
+      return yearToNumber(b.year) - yearToNumber(a.year);
     });
 
     // 6. 閲覧数ランキング（年度別）
@@ -238,9 +242,7 @@ export async function GET() {
     }));
 
     viewCountRankingByYear.sort((a, b) => {
-      const yearNumA = parseInt(a.year.match(/\d+/)?.[0] || '0', 10);
-      const yearNumB = parseInt(b.year.match(/\d+/)?.[0] || '0', 10);
-      return yearNumB - yearNumA;
+      return yearToNumber(b.year) - yearToNumber(a.year);
     });
 
     return NextResponse.json({
