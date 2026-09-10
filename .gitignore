@@ -48,3 +48,9 @@ test-*.js
 
 # SQLファイル（開発用）
 supabase-*.sql
+
+# アップロードされた議事録ファイル（実体はサーバー上のみ）
+/data/uploads/
+
+# 本番反映時のDBダンプ
+/backups/
